@@ -19,6 +19,18 @@
         .mt{
             margin-top: 25px;
         }
+        .red{
+          background-color: rgb(212, 82, 82);
+        }
+        .green{
+          background-color: rgb(89, 229, 50);
+        }
+        .custom-card-body {
+        padding: 20px; /* Adjust the padding as needed */
+        border-radius: 20px; /* Adjust the border-radius for the curved effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow */
+}
+
         </style>
 </head>
 <body>
@@ -30,50 +42,50 @@
 </div>
 
 <div class="card-group mt">
-    <div class="card" id="stationA">
-      <div class="card-body">
-        <h5 class="card-title">Station A</h5>
-        <p class="card-text" >This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+    <div class="card green" id="stationA">
+      <div class="card-body custom-card-body">
+        <h5 class="card-title">Station AB</h5>
+        <p class="card-text" >Fault: false Distance: NA</p>
         <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
 
       </div>
     </div>
-    <div class="card" id="stationBC">
+    <div class="card green" id="stationBD">
       <div class="card-body">
-        <h5 class="card-title">Station B</h5>
-        <p class="card-text">This card has supporting text below as a natural lead-in to additional content.</p>
+        <h5 class="card-title">Station BC</h5>
+        <p class="card-text">Fault: false Distance: NA</p>
         <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
 
       </div>
     </div>
-    <div class="card" id="stationC">
+    <div class="card green" id="stationBC">
       <div class="card-body">
-        <h5 class="card-title">Station C</h5>
-        <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
+        <h5 class="card-title">Station BD</h5>
+        <p class="card-text">Fault: false Distance: NA</p>
         <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
 
       </div>
     </div>
-    <div class="card" id="stationD">
+    <div class="card green" id="stationBD">
         <div class="card-body">
-          <h5 class="card-title">Station D</h5>
-          <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
+          <h5 class="card-title">Station DE</h5>
+          <p class="card-text">Fault: false Distance: NA</p>
           <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
 
         </div>
       </div>
-      <div class="card" id="stationBD">
+      <div class="card green" id="stationC">
         <div class="card-body">
-          <h5 class="card-title">Station E</h5>
-          <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
+          <h5 class="card-title">Station CF</h5>
+          <p class="card-text">Fault: false Distance: NA</p>
           <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
 
         </div>
       </div>
   </div>
 
-  <div class="logs">
-    <p class="card-text.messages"></p>
+  <div id="logs">
+    <p id="log-msg">Logs:</p>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
@@ -112,21 +124,27 @@
     function updateCard(station, messages) {
         const card = document.getElementById(`station${station}`);
         const lastUpdated = new Date().toLocaleTimeString();
-        card.querySelector(".card-text").textContent = `Messages: ${JSON.stringify(messages)}`;
-        card.querySelector(".text-muted").textContent = `Last updated: ${lastUpdated}`;
 
-        const messagesContainer = card.querySelector(".card-text.messages");
-        const distMessage = messages['dist'] !== undefined ? `Distance: ${messages['dist']}` : '';
+        if(messages['fault'] == false){
+        card.querySelector(".card-text").textContent = `Fault: ${messages['fault']} Distance: NA`;
+        
+        }
+        else if(messages['fault']==true){
+          card.querySelector(".card-text").textContent = `Fault: ${messages['fault']} Distance: ${messages['dist']}`;
+          card.classList.remove('green');
+          card.classList.add('red');
+        }
+        card.querySelector(".text-muted").textContent = `Last updated: ${lastUpdated}`;
         
         // Display 'fault' value
-        const faultMessage = messages['fault'] !== undefined ? `Fault: ${messages['fault']}` : '';
-
-        // Append new messages to the existing content
-        const existingContent = messagesContainer.innerHTML;
-        const newContent = `${existingContent}<br>${distMessage} ${faultMessage}`;
+        console.log(typeof(messages))
+        if (typeof messages === 'string') {
+          const logsContainer = document.getElementById('logs');
+        logsContainer.innerHTML += `<p> ${messages}</p>`;
 
         // Update messagesContainer with the combined content
-        messagesContainer.innerHTML = newContent;
+       // messagesContainer.innerHTML = newContent;
+        }
     }
 </script>
 
