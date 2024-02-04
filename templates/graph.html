@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+        .graph{
+            display: flex;
+            align-items: center;
+            height: 50vh;
+        }
+        .centre{
+            margin-left: 850px;
+        }
+        .mt{
+            margin-top: 25px;
+        }
+        .red{
+          background-color: rgb(212, 82, 82);
+        }
+        .green{
+          background-color: rgb(89, 229, 50);
+        }
+        .custom-card-body {
+        padding: 20px; /* Adjust the padding as needed */
+        border-radius: 20px; /* Adjust the border-radius for the curved effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow */
+}
+
+        </style>
+</head>
+<body>
+    <div class="graph">
+    <img src="{{ url_for('static', filename='images/graph.png') }}" alt="Graph Image"  >
+</div>
+<div class="centre">
+<button type="button" id="stimulateButton" onclick="stimulate()" class="btn btn-outline-primary">Stimulation</button>
+</div>
+
+<div class="card-group mt">
+    <div class="card green" id="stationA">
+      <div class="card-body custom-card-body">
+        <h5 class="card-title">Station AB</h5>
+        <p class="card-text" >Fault: false Distance: NA</p>
+        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+
+      </div>
+    </div>
+    <div class="card green" id="stationBD">
+      <div class="card-body">
+        <h5 class="card-title">Station BC</h5>
+        <p class="card-text">Fault: false Distance: NA</p>
+        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+
+      </div>
+    </div>
+    <div class="card green" id="stationBC">
+      <div class="card-body">
+        <h5 class="card-title">Station BD</h5>
+        <p class="card-text">Fault: false Distance: NA</p>
+        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+
+      </div>
+    </div>
+    <div class="card green" id="stationBD">
+        <div class="card-body">
+          <h5 class="card-title">Station DE</h5>
+          <p class="card-text">Fault: false Distance: NA</p>
+          <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+
+        </div>
+      </div>
+      <div class="card green" id="stationC">
+        <div class="card-body">
+          <h5 class="card-title">Station CF</h5>
+          <p class="card-text">Fault: false Distance: NA</p>
+          <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+
+        </div>
+      </div>
+  </div>
+
+  <div id="logs">
+    <p id="log-msg">Logs:</p>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
+  <script>
+    function stimulate() {
+        // Disable the button
+        document.getElementById("stimulateButton").disabled = true;
+        
+        // Make a GET request to a website (replace 'your_website_url' with the actual URL)
+        $.ajax({
+            type: "GET",
+            url: "http://192.168.29.105:3000",
+            success: function(response) {
+                console.log("GET request successful");
+            },
+            error: function(error) {
+                console.error("Error in GET request", error);
+            },
+            complete: function() {
+                // Enable the button after 70 seconds
+                setTimeout(function() {
+                    document.getElementById("stimulateButton").disabled = false;
+                }, 70000); // 70 seconds
+            }
+        });
+    }
+
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // Handle updates from the server
+    socket.on('ml_process_update', function(data) {
+        updateCard(data.station, data.messages);
+    });
+
+    // Function to update the card content
+    function updateCard(station, messages) {
+        const card = document.getElementById(`station${station}`);
+        const lastUpdated = new Date().toLocaleTimeString();
+
+        if(messages['fault'] == false){
+        card.querySelector(".card-text").textContent = `Fault: ${messages['fault']} Distance: NA`;
+        
+        }
+        else if(messages['fault']==true){
+          card.querySelector(".card-text").textContent = `Fault: ${messages['fault']} Distance: ${messages['dist']}`;
+          card.classList.remove('green');
+          card.classList.add('red');
+        }
+        card.querySelector(".text-muted").textContent = `Last updated: ${lastUpdated}`;
+        
+        // Display 'fault' value
+        console.log(typeof(messages))
+        if (typeof messages === 'string') {
+          const logsContainer = document.getElementById('logs');
+        logsContainer.innerHTML += `<p> ${messages}</p>`;
+
+        // Update messagesContainer with the combined content
+       // messagesContainer.innerHTML = newContent;
+        }
+    }
+</script>
+
+</body>
+</html>
